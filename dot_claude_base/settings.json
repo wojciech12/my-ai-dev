@@ -18,11 +18,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $(git rev-parse --show-toplevel)/.claude/hooks/text_to_speech_piper.py 'Claude waits for your input'"
+            "command": "echo 'Claude waits for your input' |  python3 -m piper -m en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
           },
           {
             "type": "command",
-            "command": "notify-send \"Claude waits for your input\" --urgency=critical --icon=dialog-information --hint=string:desktop-entry:code"
+            "command_linux": "notify-send \"Claude waits for your input\" --urgency=critical --icon=dialog-information --hint=string:desktop-entry:code",
+            "command": "terminal-notifier -message 'Claude waits for your input' -sound=Blow"
           }
         ]
       }
@@ -33,11 +34,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $(git rev-parse --show-toplevel)/.claude/hooks/text_to_speech_piper.py 'Claude finished its work'"
+            "command": "echo 'Claude finished its work' |  python3 -m piper -m en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
           },
           {
             "type": "command",
-            "command": "notify-send \"Claude finished its work\" --urgency=critical --icon=dialog-information --hint=string:desktop-entry:code"
+            "command_linux": "notify-send \"Claude finished its work\" --urgency=critical --icon=dialog-information --hint=string:desktop-entry:code",
+            "command": "terminal-notifier -message \"Claude finished its work\" -sound=Blow"
           }
         ]
       }

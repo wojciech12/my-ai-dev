@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Claude waits for your input' |  python3 -m piper -m en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
+            "command": "echo 'Claude waits for your input' |  python3 -m piper -m ${PIPER_DATA_DIR}/en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
           },
           {
             "type": "command",
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Claude finished its work' |  python3 -m piper -m en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
+            "command": "echo 'Claude finished its work' |  python3 -m piper -m ${PIPER_DATA_DIR}/en_US-libritts-high --output_file - | ffplay -i pipe: -f wav -nodisp -autoexit"
           },
           {
             "type": "command",

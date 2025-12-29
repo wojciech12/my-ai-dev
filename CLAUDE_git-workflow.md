@@ -7,6 +7,8 @@
 - `gh pr merge <pr-number> --squash`: Squash and merge PR
 - `gh pr edit <pr-number> --add-reviewer <username>`: Add reviewer to PR
 
+You must not use `git add -A` or `git add .`. Specify the files for the `git add` command.
+
 ### Branch Naming Conventions
 
 Use descriptive prefixes followed by descriptive names with dashes:

@@ -142,22 +142,58 @@ def main():
 
     # Step 1: Fetch PR Information
     print("Step 1: Fetching PR information...")
-    run_command("git fetch")
 
-    # Get PR details
-    pr_info_json = run_command(f"gh pr view {pr_number} --json headRefName,title,files")
+    # Get PR details including fork information
+    pr_info_json = run_command(
+        f"gh pr view {pr_number} --json headRefName,title,files,isCrossRepository,headRepositoryOwner"
+    )
     pr_info = json.loads(pr_info_json)
 
     branch_name = pr_info["headRefName"]
     branch_dir_postfix = branch_name.replace("/", "-")
     pr_title = pr_info["title"]
+    is_fork_pr = pr_info.get("isCrossRepository", False)
 
     git_top_dir = run_command("git rev-parse --show-toplevel")
+    repo_name = Path(git_top_dir).name
     temp_dir_for_ws = Path(git_top_dir) / "temp"
-    worktree_dir = temp_dir_for_ws / f"golem-vanity.market-{branch_dir_postfix}"
+    worktree_dir = temp_dir_for_ws / f"{repo_name}-{branch_dir_postfix}"
 
     print(f"PR Title: {pr_title}")
     print(f"Branch: {branch_name}")
+    print(f"Is Fork PR: {is_fork_pr}")
+
+    # Handle fork-based workflow
+    # For fork PRs, we need to:
+    # 1. Add the fork as a remote (if not already added)
+    # 2. Fetch from the fork remote
+    # 3. Create worktree using the remote branch reference (fork-owner/branch-name)
+    if is_fork_pr:
+        fork_owner = pr_info["headRepositoryOwner"]["login"]
+        fork_remote_name = f"fork-{fork_owner}"
+        fork_url = f"git@github.com:{fork_owner}/{repo_name}.git"
+
+        print(f"Fork Owner: {fork_owner}")
+        print(f"Fork Remote: {fork_remote_name}")
+
+        # Check if remote already exists
+        existing_remotes = run_command("git remote").split("\n")
+        if fork_remote_name not in existing_remotes:
+            print(f"Adding fork remote: {fork_url}")
+            run_command(f"git remote add {fork_remote_name} {fork_url}")
+
+        # Fetch from fork
+        print(f"Fetching from fork remote: {fork_remote_name}")
+        run_command(f"git fetch {fork_remote_name}")
+
+        # Use the remote branch reference for worktree
+        branch_ref = f"{fork_remote_name}/{branch_name}"
+    else:
+        # For non-fork PRs, fetch from origin
+        run_command("git fetch")
+        branch_ref = branch_name
+
+    print(f"Branch reference: {branch_ref}")
 
     # Step 2: Create Worktree
     print("Step 2: Creating worktree...")
@@ -169,7 +205,8 @@ def main():
         run_command(f"git worktree remove {worktree_dir} --force")
 
     if not worktree_dir.exists():
-        run_command(f"git worktree add {worktree_dir} {branch_name}")
+        print(f"Creating worktree from: {branch_ref}")
+        run_command(f"git worktree add {worktree_dir} {branch_ref}")
     else:
         print("Using existing worktree...")
 
